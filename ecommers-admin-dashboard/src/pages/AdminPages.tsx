@@ -2045,7 +2045,7 @@ function Sellers() {
           <tr>
             <td className="admin-seller-shop-cell"><strong>{item.shop_name}</strong><small>{item.slug}</small></td>
             <td>{(item.business_type ?? 'individual_seller').replace(/_/g, ' ')}</td>
-            <td>{item.contact_email ?? '-'}{item.phone && <small>{item.phone}</small>}<SellerDocumentLink path={item.document_path} /></td>
+            <td>{item.contact_email ?? '-'}{item.phone && <small>{item.phone}</small>}<SellerDocumentLink path={item.document_path} sellerProfileId={item.id} documentType="business_document" /></td>
             <td><em className={statusClass(item.status)}>{item.status}</em>{item.vendor_locked && <small className="admin-status admin-status--suspended">Locked</small>}{item.rejection_reason && <small>Review note: {item.rejection_reason}</small>}</td>
             <td>{item.allow_product_publishing_without_review ? <em className="admin-status admin-status--approved">Enabled</em> : <em className="admin-status">Approval required</em>}</td>
             <td>{formatDate(item.created_at)}</td>
@@ -2066,14 +2066,14 @@ function Sellers() {
         <div className="admin-seller-details">
           <section className="admin-seller-details__wide"><h4>Shop description</h4><p>{detailsTarget.description || 'No description provided.'}</p></section>
           <section><h4>Contact information</h4><p><strong>Email:</strong> {detailsTarget.contact_email || 'Not provided'}</p><p><strong>Phone:</strong> {detailsTarget.phone || 'Not provided'}</p></section>
-          <section><h4>Identity and business details</h4><p><strong>Business category:</strong> {(detailsTarget.business_type ?? 'individual_seller').replace(/_/g, ' ')}</p><p><strong>Legal business structure:</strong> {detailsTarget.vendor_type?.replace(/_/g, ' ') || 'Not provided'}</p><p><strong>Trusted product publishing:</strong> {detailsTarget.allow_product_publishing_without_review ? 'Enabled' : 'Admin approval required'}</p><p><strong>Owner full legal name:</strong> {detailsTarget.owner_full_name || 'Not provided'}</p><p><strong>CNIC number:</strong> {detailsTarget.cnic_number || 'Not provided'}</p><p><strong>Shop location details:</strong> {detailsTarget.shop_location_text || 'Not provided'}</p></section>
+          <section><h4>Identity and business details</h4><p><strong>Business category:</strong> {(detailsTarget.business_type ?? 'individual_seller').replace(/_/g, ' ')}</p><p><strong>Legal business structure:</strong> {detailsTarget.vendor_type?.replace(/_/g, ' ') || 'Not provided'}</p><p><strong>Trusted product publishing:</strong> {detailsTarget.allow_product_publishing_without_review ? 'Enabled' : 'Admin approval required'}</p><p><strong>Owner full legal name:</strong> {detailsTarget.owner_full_name || 'Not provided'}</p><p><strong>CNIC number:</strong> {detailsTarget.cnic_number ? `•••••••••${detailsTarget.cnic_number.slice(-4)}` : 'Not provided'}</p><p><strong>Shop location details:</strong> {detailsTarget.shop_location_text || 'Not provided'}</p></section>
           <section><h4>Application status</h4><p><strong>Status:</strong> {detailsTarget.status}</p><p><strong>Submitted:</strong> {formatDate(detailsTarget.created_at)}</p>{detailsTarget.vendor_locked && <p>Vendor account is locked.</p>}{detailsTarget.rejection_reason && <p><strong>Review note:</strong> {detailsTarget.rejection_reason}</p>}</section>
           <section><h4>Current address</h4><p>{detailsTarget.current_address || 'Not provided'}</p></section>
           <section><h4>Complete address</h4><p>{detailsTarget.complete_address || 'Not provided'}</p></section>
           <section><h4>Shop location</h4><p><strong>Area / map label:</strong> {detailsTarget.shop_location_label || 'Not provided'}</p><p><strong>Coordinates:</strong> {detailsTarget.shop_lat != null && detailsTarget.shop_lng != null ? `${detailsTarget.shop_lat}, ${detailsTarget.shop_lng}` : 'Not captured'}</p>{detailsTarget.shop_lat != null && detailsTarget.shop_lng != null && <a href={`https://www.google.com/maps?q=${detailsTarget.shop_lat},${detailsTarget.shop_lng}`} target="_blank" rel="noreferrer">Open shop location in Google Maps</a>}</section>
-          <section><h4>CNIC front image</h4>{detailsTarget.cnic_front_path ? <><p>Private CNIC front image is available.</p><SellerDocumentLink path={detailsTarget.cnic_front_path} label="View CNIC front" /></> : <p>No CNIC front image uploaded.</p>}</section>
-          <section><h4>CNIC back image</h4>{detailsTarget.cnic_back_path ? <><p>Private CNIC back image is available.</p><SellerDocumentLink path={detailsTarget.cnic_back_path} label="View CNIC back" /></> : <p>No CNIC back image uploaded.</p>}</section>
-          <section><h4>Shop business information PDF</h4>{detailsTarget.document_path ? <><p>Private seller-prepared business profile PDF is available for administrator review.</p><SellerDocumentLink path={detailsTarget.document_path} label="View business information PDF" /></> : <p>No business information PDF uploaded.</p>}</section>
+          <section><h4>CNIC front image</h4>{detailsTarget.cnic_front_path ? <><p>Private CNIC front image is available.</p><SellerDocumentLink path={detailsTarget.cnic_front_path} sellerProfileId={detailsTarget.id} documentType="cnic_front" label="View CNIC front" /></> : <p>No CNIC front image uploaded.</p>}</section>
+          <section><h4>CNIC back image</h4>{detailsTarget.cnic_back_path ? <><p>Private CNIC back image is available.</p><SellerDocumentLink path={detailsTarget.cnic_back_path} sellerProfileId={detailsTarget.id} documentType="cnic_back" label="View CNIC back" /></> : <p>No CNIC back image uploaded.</p>}</section>
+          <section><h4>Shop business information PDF</h4>{detailsTarget.document_path ? <><p>Private seller-prepared business profile PDF is available for administrator review.</p><SellerDocumentLink path={detailsTarget.document_path} sellerProfileId={detailsTarget.id} documentType="business_document" label="View business information PDF" /></> : <p>No business information PDF uploaded.</p>}</section>
         </div>
       </section>
     </div>}
@@ -2327,15 +2327,20 @@ function Customers() {
   </section>
 }
 
-function SellerDocumentLink({ path, label = 'View document' }: { path: string | null; label?: string }) {
+function SellerDocumentLink({ path, sellerProfileId, documentType, label = 'View document' }: {
+  path: string | null
+  sellerProfileId: string
+  documentType: 'cnic_front' | 'cnic_back' | 'business_document'
+  label?: string
+}) {
   const { push } = useToast()
   const [opening, setOpening] = useState(false)
   async function open() {
     if (!path) return
     setOpening(true)
     try {
-      const url = await getVendorDocumentSignedUrl(path)
-      if (!url) throw new Error('A signed document link could not be created.')
+      const url = await getVendorDocumentSignedUrl(sellerProfileId, documentType)
+      if (!url) throw new Error('A signed document link could not be created or its access could not be logged.')
       window.open(url, '_blank', 'noopener,noreferrer')
     } catch (cause) {
       push(cause instanceof Error ? cause.message : 'The verification document could not be opened.', 'error')
