@@ -1035,3 +1035,10 @@
 @media(max-width:1050px){.orders-process-guide li{padding:13px 12px;gap:9px}.orders-process-guide small{white-space:normal}.orders-page .orders-workflow-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.orders-page .orders-heading{margin-bottom:12px;padding:21px 18px;border-radius:16px}.orders-page .orders-heading:after{right:-45px;opacity:.65}.orders-page .orders-heading .admin-copy{max-width:90%;font-size:12px}.orders-process-guide{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:12px;border-radius:13px}.orders-process-guide li{padding:12px 10px}.orders-process-guide li+li{border-left:0}.orders-process-guide li:nth-child(even){border-left:1px solid #ecece8}.orders-process-guide li:nth-child(n+3){border-top:1px solid #ecece8}.orders-process-guide li>span{width:30px;height:30px;flex-basis:30px;border-radius:9px;font-size:10px}.orders-process-guide strong{font-size:11px}.orders-process-guide small{font-size:9px}.orders-page .orders-workflow-panel{padding:12px;border-radius:14px}.orders-page .orders-workflow-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.orders-page .orders-workflow-tab{min-height:66px;padding:9px;border-radius:11px}.orders-page .orders-filters{padding:11px}.orders-page .orders-table-wrap{border-radius:12px}.orders-page .orders-fulfilment-panel{gap:9px;padding:10px}.orders-page .orders-fulfilment-panel>div{padding:11px!important}.orders-page .orders-fulfilment-cell{padding:8px!important}.orders-page .orders-row-actions{min-width:210px}.orders-page .admin-pagination{gap:7px;flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.orders-page .orders-workflow-tab{transition:none}}
+
+
+/* Keep collapsed navigation scrollable when it exceeds the viewport. */
+.admin-app--collapsed .admin-sidebar{height:100vh;height:100dvh;min-height:0;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#596054 #20231f}
+.admin-app--collapsed .admin-brand{flex:0 0 auto}
+.admin-app--collapsed .admin-nav{min-height:0;flex:0 0 auto}
+.admin-app--collapsed .admin-sidebar-footer{flex:0 0 auto}
