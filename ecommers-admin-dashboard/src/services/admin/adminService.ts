@@ -1149,6 +1149,13 @@ export async function setAdminVendorLock(id: string, locked: boolean, reason?: s
   return data as AdminSeller
 }
 
+export async function setAdminVendorProductPublishingPermission(id: string, enabled: boolean): Promise<AdminSeller> {
+  const { data, error } = await getSupabase().rpc('admin_set_vendor_product_publishing_permission', { p_seller_id: id, p_enabled: enabled })
+  assertError(error)
+  if (!data) throw new Error('Vendor publishing permission could not be updated.')
+  return data as AdminSeller
+}
+
 
 export async function saveDeliveryCollection(orderId: string, amounts: { id: string; amount: number }[]) {
   const client = getSupabase() as any
