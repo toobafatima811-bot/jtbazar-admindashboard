@@ -986,3 +986,52 @@
 .admin-finance>.admin-panel{margin-bottom:0}
 @media(max-width:900px){.admin-finance-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:600px){.admin-finance-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px}.admin-finance-tab{min-height:60px;padding:9px}.admin-finance-tab span{font-size:11px}.admin-finance-tab small{font-size:9px}}
+
+
+/* Order Center visual refresh — presentation only */
+.orders-page{max-width:1480px;margin-inline:auto;padding-bottom:32px}
+.orders-page .orders-heading{position:relative;overflow:hidden;margin-bottom:18px;padding:26px 30px;border:1px solid #e7e8e4;border-radius:20px;background:radial-gradient(circle at 88% 20%,rgba(244,177,65,.16),transparent 30%),linear-gradient(120deg,#fff 0%,#fbfaf7 65%,#f7f1e6 100%);box-shadow:0 14px 34px rgba(22,32,25,.055)}
+.orders-page .orders-heading:after{position:absolute;right:30px;bottom:-48px;width:180px;height:180px;border:1px solid rgba(157,110,32,.13);border-radius:50%;content:"";box-shadow:0 0 0 18px rgba(157,110,32,.035),0 0 0 38px rgba(157,110,32,.025);pointer-events:none}
+.orders-page .orders-heading h2{margin:5px 0 7px;color:#18251e;font-size:clamp(25px,3vw,34px);letter-spacing:-.035em;line-height:1.1}
+.orders-page .orders-heading .admin-copy{max-width:680px;margin:0;color:#66716b;font-size:14px;line-height:1.6}
+.orders-process-guide{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0 0 18px;padding:0;overflow:hidden;border:1px solid #e8e9e5;border-radius:16px;background:#fff;list-style:none;box-shadow:0 8px 22px rgba(24,37,30,.035)}
+.orders-process-guide li{position:relative;display:flex;min-width:0;align-items:center;gap:12px;padding:16px 18px}
+.orders-process-guide li+li{border-left:1px solid #ecece8}
+.orders-process-guide li>span{display:grid;width:34px;height:34px;flex:0 0 34px;place-items:center;border-radius:11px;background:#f8f0df;color:#9c6715;font-size:11px;font-weight:850;letter-spacing:.04em}
+.orders-process-guide li div{display:grid;gap:3px;min-width:0}
+.orders-process-guide strong{color:#25342b;font-size:12px;font-weight:800}
+.orders-process-guide small{overflow:hidden;color:#778079;font-size:10px;line-height:1.4;text-overflow:ellipsis;white-space:nowrap}
+.orders-page>.admin-panel:has(.admin-nav-badge){border:1px solid #f3d6d2!important;border-left:4px solid #d95142!important;border-radius:14px;background:linear-gradient(110deg,#fff9f7,#fff 74%);box-shadow:0 6px 18px rgba(120,45,32,.045)}
+.orders-page>.admin-panel:has(.admin-nav-badge)>div:first-child{padding-bottom:10px;border-bottom:1px solid #f2e4e1}
+.orders-page>.admin-panel:has(.admin-nav-badge) strong{color:#63372f;font-size:14px}
+.orders-page .orders-workflow-panel{margin-bottom:12px;padding:18px;border:1px solid #e7e9e5;border-radius:17px;background:linear-gradient(135deg,#fff,#f8f9f6);box-shadow:0 10px 26px rgba(22,32,25,.045)}
+.orders-page .orders-workflow-heading{margin-bottom:14px}
+.orders-page .orders-workflow-heading .admin-kicker{color:#a76e17}
+.orders-page .orders-workflow-heading .admin-copy{font-size:12px;line-height:1.5}
+.orders-page .orders-workflow-tabs{gap:10px}
+.orders-page .orders-workflow-tab{min-height:78px;padding:13px 14px;border-color:#e6e8e3;border-radius:14px;box-shadow:0 2px 6px rgba(25,35,28,.025)}
+.orders-page .orders-workflow-tab:hover{border-color:#d5a349;background:#fffdf8;box-shadow:0 8px 18px rgba(75,57,25,.08);transform:translateY(-2px)}
+.orders-page .orders-workflow-tab.is-active{border-color:#243c2d;background:linear-gradient(135deg,#243c2d,#172b20);box-shadow:0 9px 20px rgba(32,57,41,.17)}
+.orders-page .orders-workflow-tab__count{min-width:30px;height:27px;background:#f6edda;color:#815716}
+.orders-page .orders-filters{padding:15px;border:1px solid #e7e9e5;border-radius:15px;background:#fff;box-shadow:0 5px 16px rgba(22,32,25,.03)}
+.orders-page .orders-filters .admin-toolbar{gap:10px}
+.orders-page .orders-filters .admin-search{min-height:42px;border-color:#e4e7e2;border-radius:11px;background:#fbfcfa}
+.orders-page .orders-filter-controls select{min-height:40px;border-color:#e4e7e2;border-radius:10px;background:#fbfcfa}
+.orders-page .orders-table-wrap{overflow:auto!important;border-color:#e6e8e4;border-radius:15px;box-shadow:0 10px 28px rgba(22,32,25,.055);scrollbar-color:#c6c9c3 #f5f6f3;scrollbar-width:thin}
+.orders-page .orders-table thead th{padding:13px 12px;border-bottom:1px solid #e8eae5;background:#f7f8f5;color:#626d65;font-size:10px;font-weight:800;letter-spacing:.075em;text-transform:uppercase}
+.orders-page .orders-table tbody tr:not(.orders-fulfilment-cell):hover{background:#fbfcf9}
+.orders-page .orders-table tbody td{padding:13px 12px;border-bottom:1px solid #eff0ec;color:#38443c;font-size:12px;vertical-align:middle}
+.orders-page .orders-table tbody td strong{color:#202e25;font-weight:750}
+.orders-page .orders-table tbody td small{color:#7a847d;font-size:10px;line-height:1.45}
+.orders-page .orders-row-actions{gap:7px}
+.orders-page .orders-row-actions .orders-manage-button{border-color:#d7dfd8;background:#f5f8f4;color:#2d4736;font-weight:750}
+.orders-page .orders-fulfilment-cell{padding:14px!important;background:#f8faf7}
+.orders-page .orders-fulfilment-panel{display:grid;gap:14px;padding:18px;border-color:#e0e6de;border-radius:15px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 6px 18px rgba(22,32,25,.035)}
+.orders-page .orders-fulfilment-panel>div{padding:14px!important;border:1px solid #e9ece7;border-radius:12px;background:#fcfdfa}
+.orders-page .orders-fulfilment-panel>div>strong{display:block;margin-bottom:7px;color:#25382b;font-size:13px}
+.orders-page .orders-fulfilment-panel .admin-copy{color:#68746b;font-size:11px;line-height:1.55}
+.orders-page .orders-fulfilment-panel em{display:inline-flex;border-radius:999px;font-size:10px;font-style:normal;font-weight:700}
+.orders-page .admin-pagination{margin-top:12px;padding:12px 14px;border:1px solid #e8eae5;border-radius:12px;background:#fff}
+@media(max-width:1050px){.orders-process-guide li{padding:13px 12px;gap:9px}.orders-process-guide small{white-space:normal}.orders-page .orders-workflow-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.orders-page .orders-heading{margin-bottom:12px;padding:21px 18px;border-radius:16px}.orders-page .orders-heading:after{right:-45px;opacity:.65}.orders-page .orders-heading .admin-copy{max-width:90%;font-size:12px}.orders-process-guide{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:12px;border-radius:13px}.orders-process-guide li{padding:12px 10px}.orders-process-guide li+li{border-left:0}.orders-process-guide li:nth-child(even){border-left:1px solid #ecece8}.orders-process-guide li:nth-child(n+3){border-top:1px solid #ecece8}.orders-process-guide li>span{width:30px;height:30px;flex-basis:30px;border-radius:9px;font-size:10px}.orders-process-guide strong{font-size:11px}.orders-process-guide small{font-size:9px}.orders-page .orders-workflow-panel{padding:12px;border-radius:14px}.orders-page .orders-workflow-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.orders-page .orders-workflow-tab{min-height:66px;padding:9px;border-radius:11px}.orders-page .orders-filters{padding:11px}.orders-page .orders-table-wrap{border-radius:12px}.orders-page .orders-fulfilment-panel{gap:9px;padding:10px}.orders-page .orders-fulfilment-panel>div{padding:11px!important}.orders-page .orders-fulfilment-cell{padding:8px!important}.orders-page .orders-row-actions{min-width:210px}.orders-page .admin-pagination{gap:7px;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.orders-page .orders-workflow-tab{transition:none}}
