@@ -947,11 +947,15 @@ export async function listSellerApplications(status = 'all'): Promise<AdminSelle
   return (data ?? []) as AdminSeller[]
 }
 
-export async function getVendorDocumentSignedUrl(path: string): Promise<string | null> {
-  const client = getSupabase()
-  const { data, error } = await client.storage.from('vendor-documents').createSignedUrl(path, 600)
-  if (error || !data) return null
-  return data.signedUrl
+export async function getVendorDocumentSignedUrl(
+  sellerProfileId: string,
+  documentType: 'cnic_front' | 'cnic_back' | 'business_document',
+): Promise<string | null> {
+  const { data, error } = await getSupabase().functions.invoke('vendor-document-access', {
+    body: { seller_profile_id: sellerProfileId, document_type: documentType },
+  })
+  if (error || !data?.signed_url) return null
+  return data.signed_url as string
 }
 
 export async function reviewSellerApplication(id: string, status: Database['public']['Tables']['seller_profiles']['Row']['status'], reason?: string) {
