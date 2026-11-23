@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Archive, ArrowLeft, BarChart3, Bell, Boxes, Check, CheckCheck, ChevronLeft, ChevronRight, CircleAlert, ClipboardList, Edit2, Film, FolderTree, Eye, EyeOff, Image as ImageIcon, Info, LayoutDashboard, LogOut, MapPin, Menu, MoreHorizontal, PanelLeftClose, PanelLeftOpen, MessageSquare, Package, Plus, Printer, RefreshCw, Search, Send, Settings, ShieldAlert, Star, Store, Tag, Trash2, Truck, Users, Volume2, VolumeX, Wallet, X } from 'lucide-react'
+import { Archive, ArrowLeft, BarChart3, Bell, Boxes, Check, CheckCheck, ChevronLeft, ChevronRight, CircleAlert, ClipboardList, Edit2, Film, FolderTree, Eye, EyeOff, Image as ImageIcon, Info, LayoutDashboard, LoaderCircle, LogOut, MapPin, Menu, MoreHorizontal, PanelLeftClose, PanelLeftOpen, MessageSquare, Package, Plus, Printer, RefreshCw, Search, Send, Settings, ShieldAlert, Star, Store, Tag, Trash2, Truck, Users, Volume2, VolumeX, Wallet, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import { adjustInventory, decideMarketplaceCase, deleteAdminHero, deleteAdminPromotion, deleteProductVariant, getAdminOrderDetail, getAdminProductEditor, getAdminStoreSettings, getAdminFoodDeliverySettings, getAdminCommissionSettings, getAdminSummary, getVendorDocumentSignedUrl, listAdminCategories, listAdminAuditLogsPage, listAdminPromotionsPage, listAdminHeroesPage, listSellerApplicationsPage, listAdminCategoriesPage, listAdminAccountSuspensions, listAdminCustomers, listAdminInventory, listAdminNotifications, listAdminOrders, listAdminOrderVendors, listAdminVendorPickups, markAdminVendorPickedUp, listAdminProducts, listAdminProductsPage, listAdminVendorDirectoryPage, listAdminCustomerReviews, setAdminCustomerReviewStatus, listAdminSupportTickets, listAdminSellerSupportMessages, sendAdminSellerSupportMessage, listAdminCustomerSupportMessages, sendAdminCustomerSupportMessage, listMarketplaceCases, listAdminRefundRecordsPage, listAdminVendorSettlementBalances, listAdminVendorSettlementCandidates, listAdminVendorSettlementBatchesPage, listAdminVendorSettlementItemsPage, recordAdminCaseRefund, updateAdminRefundStatus, createAdminVendorSettlement, markAdminNotificationRead, markAllAdminNotificationsRead, sendAdminPushTest, sendAdminManualNotification, moderateProduct, deleteAdminProductImage, deleteAdminProductPermanently, deleteAdminProductDeletionRequest, listAdminProductDeletionRequests, reviewAdminProductDeletion, reviewSellerApplication, setAdminVendorLock, setAdminVendorProductPublishingPermission, setAdminSupportTicketStatus, saveAdminHero, saveAdminPromotion, saveCategory, saveProduct, saveProductVariant, saveAdminProductInventory, setAdminAccountSuspension, updateAdminStoreSettings, updateAdminFoodDeliverySettings, updateAdminCommissionSettings, updateAdminSupportTicket, saveDeliveryCollection, addOrderNote, rejectAdminOrder, findCustomerDeliveryOrders, confirmOrdersWithDeliveryBatch, createFollowupDeliveryBatch, listOrderDeliveryBatches, setAdminRefundMethod, updateProductStatus, updateProductsHotDeal, setAdminProductFeatured, uploadAdditionalProductImage, uploadPublicMedia, type AdminCaseDetail, type AdminCategory, type AdminCustomerReview, type AdminAccountSuspension, type AdminCustomer, type AdminHero, type AdminInventory, type AdminNotification, type AdminOrder, type AdminOrderVendor, type AdminProduct, type AdminProductDeletionRequest, type AdminPromotion, type AdminSeller, type AdminStoreSettings, type AdminFoodDeliverySettings, type AdminCommissionSettings, type AdminSummary, type AdminSupportInboxTicket, type AdminSupportChatMessage, type AdminVariant, type AdminRefundRecord, type AdminSettlementBalance, type AdminSettlementCandidate, type AdminSettlementBatch, type AdminSettlementLedgerItem } from '../services/admin/adminService'
@@ -1970,6 +1970,9 @@ function Sellers() {
   const [reason, setReason] = useState('')
   const [savingReview, setSavingReview] = useState(false)
   const [savingPermissionId, setSavingPermissionId] = useState<string | null>(null)
+  const [savingVendorLockId, setSavingVendorLockId] = useState<string | null>(null)
+  const vendorLockInFlightRef = useRef<Set<string>>(new Set())
+  const publishingInFlightRef = useRef<Set<string>>(new Set())
   const load = () => {
     setError(null)
     void listSellerApplicationsPage(status, search, page, pageSize).then((result) => { setItems(result.items); setTotal(result.count) }).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Seller applications could not be loaded.'))
@@ -1997,14 +2000,41 @@ function Sellers() {
     }
   }
 
+  async function toggleVendorLock(item: AdminSeller) {
+    if (vendorLockInFlightRef.current.has(item.id)) return
+    vendorLockInFlightRef.current.add(item.id)
+    const nextLocked = !item.vendor_locked
+    const action = nextLocked ? 'lock' : 'unlock'
+    if (!window.confirm(`Are you sure you want to ${action} ${item.shop_name}? ${item.vendor_locked ? 'The seller will be able to edit again.' : 'The seller will not be able to change shop, products or inventory.'}`)) {
+      vendorLockInFlightRef.current.delete(item.id)
+      return
+    }
+    setSavingVendorLockId(item.id)
+    try {
+      await setAdminVendorLock(item.id, nextLocked)
+      push(item.vendor_locked ? 'Vendor unlocked. Seller editing is enabled again.' : 'Vendor locked. Database writes from this seller are blocked.', 'success')
+      load()
+    } catch (cause) {
+      push(cause instanceof Error ? cause.message : 'Vendor lock could not be changed.', 'error')
+    } finally {
+      vendorLockInFlightRef.current.delete(item.id)
+      setSavingVendorLockId((current) => current === item.id ? null : current)
+    }
+  }
+
   async function toggleProductPublishingPermission(item: AdminSeller) {
+    if (publishingInFlightRef.current.has(item.id)) return
     if (item.status !== 'approved') {
       push('Only approved vendors can receive trusted publishing permission.', 'error')
       return
     }
+    publishingInFlightRef.current.add(item.id)
     const next = !item.allow_product_publishing_without_review
     const action = next ? 'allow products to publish without review' : 'require admin approval for future products and edits'
-    if (!window.confirm(`Are you sure you want to ${action} for ${item.shop_name}? Admins can still block products and revoke this permission.`)) return
+    if (!window.confirm(`Are you sure you want to ${action} for ${item.shop_name}? Admins can still block products and revoke this permission.`)) {
+      publishingInFlightRef.current.delete(item.id)
+      return
+    }
     try {
       setSavingPermissionId(item.id)
       await setAdminVendorProductPublishingPermission(item.id, next)
@@ -2014,7 +2044,8 @@ function Sellers() {
     } catch (cause) {
       push(cause instanceof Error ? cause.message : 'Vendor publishing permission could not be changed.', 'error')
     } finally {
-      setSavingPermissionId(null)
+      publishingInFlightRef.current.delete(item.id)
+      setSavingPermissionId((current) => current === item.id ? null : current)
     }
   }
 
@@ -2060,7 +2091,7 @@ function Sellers() {
               {(item.status === 'pending' || item.status === 'rejected') && <button type="button" className="admin-small-button" onClick={() => void review(item, 'approved')}>Approve</button>}
               {(item.status === 'pending' || item.status === 'rejected') && <button type="button" className="admin-small-button admin-small-button--danger" onClick={() => openReasonModal(item, 'rejected')}>{item.status === 'rejected' ? 'Update rejection' : 'Reject'}</button>}
               {item.status === 'approved' && <button type="button" className="admin-small-button admin-small-button--danger" onClick={() => openReasonModal(item, 'suspended')}>Suspend</button>}
-              {item.status === 'suspended' && <button type="button" className="admin-small-button" onClick={() => void review(item, 'approved')}>Reactivate</button>}<button type="button" className={item.vendor_locked ? 'admin-small-button' : 'admin-small-button admin-small-button--danger'} onClick={() => { const action = item.vendor_locked ? 'unlock' : 'lock'; if (!window.confirm(`Are you sure you want to ${action} ${item.shop_name}? ${item.vendor_locked ? 'The seller will be able to edit again.' : 'The seller will not be able to change shop, products or inventory.'}`)) return; void setAdminVendorLock(item.id, !item.vendor_locked).then(() => { push(item.vendor_locked ? 'Vendor unlocked. Seller editing is enabled again.' : 'Vendor locked. Database writes from this seller are blocked.', 'success'); load() }).catch((cause) => push(cause instanceof Error ? cause.message : 'Vendor lock could not be changed.', 'error')) }}>{item.vendor_locked ? 'Unlock vendor' : 'Lock vendor'}</button><button type="button" className={item.allow_product_publishing_without_review ? 'admin-small-button admin-small-button--danger' : 'admin-small-button'} disabled={savingPermissionId === item.id || item.status !== 'approved'} title={item.status !== 'approved' ? 'Approve vendor first' : item.allow_product_publishing_without_review ? 'Revoke trusted publishing' : 'Allow publishing without review'} onClick={() => void toggleProductPublishingPermission(item)}>{savingPermissionId === item.id ? 'Saving…' : item.allow_product_publishing_without_review ? 'Revoke publish permission' : 'Allow direct publishing'}</button>
+              {item.status === 'suspended' && <button type="button" className="admin-small-button" disabled={savingReview} onClick={() => void review(item, 'approved')}>{savingReview ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Processing...</> : 'Reactivate'}</button>}<button type="button" className={item.vendor_locked ? 'admin-small-button' : 'admin-small-button admin-small-button--danger'} disabled={savingVendorLockId === item.id} onClick={() => void toggleVendorLock(item)}>{savingVendorLockId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Processing...</> : item.vendor_locked ? 'Unlock vendor' : 'Lock vendor'}</button><button type="button" className={item.allow_product_publishing_without_review ? 'admin-small-button admin-small-button--danger' : 'admin-small-button'} disabled={savingPermissionId === item.id || item.status !== 'approved'} title={item.status !== 'approved' ? 'Approve vendor first' : item.allow_product_publishing_without_review ? 'Revoke trusted publishing' : 'Allow publishing without review'} onClick={() => void toggleProductPublishingPermission(item)}>{savingPermissionId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Saving...</> : item.allow_product_publishing_without_review ? 'Revoke publish permission' : 'Allow direct publishing'}</button>
             </div></td>
           </tr>
 
@@ -2090,7 +2121,7 @@ function Sellers() {
         <form onSubmit={submitReason}>
           <label htmlFor="seller-review-reason">Reason / correction notes <span>*</span></label>
           <textarea id="seller-review-reason" value={reason} onChange={(event) => setReason(event.target.value)} required minLength={3} maxLength={1000} rows={5} placeholder="Explain what needs to be corrected…" />
-          <div className="admin-action-row"><button type="button" className="admin-button admin-button--outline" disabled={savingReview} onClick={() => { setReasonTarget(null); setReason('') }}>Cancel</button><button type="submit" className={reasonTarget.status === 'rejected' ? 'admin-button admin-button--danger' : 'admin-button'} disabled={savingReview || reason.trim().length < 3}>{savingReview ? 'Saving…' : reasonTarget.status === 'rejected' ? 'Reject application' : 'Confirm suspension'}</button></div>
+          <div className="admin-action-row"><button type="button" className="admin-button admin-button--outline" disabled={savingReview} onClick={() => { setReasonTarget(null); setReason('') }}>Cancel</button><button type="submit" className={reasonTarget.status === 'rejected' ? 'admin-button admin-button--danger' : 'admin-button'} disabled={savingReview || reason.trim().length < 3}>{savingReview ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Processing...</> : reasonTarget.status === 'rejected' ? 'Reject application' : 'Confirm suspension'}</button></div>
         </form>
       </section>
     </div>}
@@ -2342,7 +2373,7 @@ function SellerDocumentLink({ path, sellerProfileId, documentType, label = 'View
   const { push } = useToast()
   const [opening, setOpening] = useState(false)
   async function open() {
-    if (!path) return
+    if (!path || opening) return
     setOpening(true)
     try {
       const url = await getVendorDocumentSignedUrl(sellerProfileId, documentType)
@@ -2353,7 +2384,7 @@ function SellerDocumentLink({ path, sellerProfileId, documentType, label = 'View
     } finally { setOpening(false) }
   }
   if (!path) return <small>No verification document uploaded</small>
-  return <button className="admin-small-button" onClick={() => void open()} disabled={opening}>{opening ? 'Opening…' : label}</button>
+  return <button type="button" className="admin-small-button" onClick={() => void open()} disabled={opening} aria-busy={opening}>{opening ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Opening...</> : label}</button>
 }
 
 type FoodMapPoint = { lat: number; lng: number }
