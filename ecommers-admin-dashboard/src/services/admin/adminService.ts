@@ -11,7 +11,7 @@ export type AdminInventory = Database['public']['Tables']['product_inventory']['
 export type AdminCustomer = Database['public']['Functions']['admin_customer_summary']['Returns'][number]
 export type AdminAccountSuspension = Database['public']['Functions']['admin_account_suspensions']['Returns'][number]
 export type AdminVariant = Database['public']['Tables']['product_variants']['Row']
-export type AdminSeller = Database['public']['Tables']['seller_profiles']['Row']
+export type AdminSeller = Database['public']['Tables']['seller_profiles']['Row'] & { commission_enabled: boolean }
 export type AdminProductDeletionRequest = { id: string; product_id: string; product_name: string; product_image_url: string | null; seller_id: string; shop_name: string; reason: string; status: 'pending' | 'approved' | 'rejected'; admin_note: string | null; created_at: string }
 export type AdminCase = Database['public']['Tables']['marketplace_cases']['Row']
 export type AdminCaseDetail = AdminCase & {
@@ -1151,6 +1151,13 @@ export async function setAdminVendorLock(id: string, locked: boolean, reason?: s
   const { data, error } = await getSupabase().rpc('admin_set_vendor_lock', { p_seller_id: id, p_locked: locked, p_reason: reason ?? null })
   assertError(error)
   return data as AdminSeller
+}
+
+export async function setAdminVendorCommissionEnabled(id: string, enabled: boolean): Promise<{ seller_id: string; commission_enabled: boolean; products_updated: number; changed: boolean }> {
+  const { data, error } = await (getSupabase() as any).rpc('admin_set_vendor_commission', { p_seller_id: id, p_enabled: enabled })
+  assertError(error)
+  if (!data) throw new Error('Vendor commission setting could not be updated.')
+  return data as { seller_id: string; commission_enabled: boolean; products_updated: number; changed: boolean }
 }
 
 export async function setAdminVendorProductPublishingPermission(id: string, enabled: boolean): Promise<AdminSeller> {
