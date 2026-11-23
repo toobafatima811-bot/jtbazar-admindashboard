@@ -4,7 +4,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Archive, ArrowLeft, BarChart3, Bell, Boxes, Check, CheckCheck, ChevronLeft, ChevronRight, CircleAlert, ClipboardList, Edit2, Film, FolderTree, Eye, EyeOff, Image as ImageIcon, Info, LayoutDashboard, LoaderCircle, LogOut, MapPin, Menu, MoreHorizontal, PanelLeftClose, PanelLeftOpen, MessageSquare, Package, Plus, Printer, RefreshCw, Search, Send, Settings, ShieldAlert, Star, Store, Tag, Trash2, Truck, Users, Volume2, VolumeX, Wallet, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
-import { adjustInventory, decideMarketplaceCase, deleteAdminHero, deleteAdminPromotion, deleteProductVariant, getAdminOrderDetail, getAdminProductEditor, getAdminStoreSettings, getAdminFoodDeliverySettings, getAdminCommissionSettings, getAdminSummary, getVendorDocumentSignedUrl, listAdminCategories, listAdminAuditLogsPage, listAdminPromotionsPage, listAdminHeroesPage, listSellerApplicationsPage, listAdminCategoriesPage, listAdminAccountSuspensions, listAdminCustomers, listAdminInventory, listAdminNotifications, listAdminOrders, listAdminOrderVendors, listAdminVendorPickups, markAdminVendorPickedUp, listAdminProducts, listAdminProductsPage, listAdminVendorDirectoryPage, listAdminCustomerReviews, setAdminCustomerReviewStatus, listAdminSupportTickets, listAdminSellerSupportMessages, sendAdminSellerSupportMessage, listAdminCustomerSupportMessages, sendAdminCustomerSupportMessage, listMarketplaceCases, listAdminRefundRecordsPage, listAdminVendorSettlementBalances, listAdminVendorSettlementCandidates, listAdminVendorSettlementBatchesPage, listAdminVendorSettlementItemsPage, recordAdminCaseRefund, updateAdminRefundStatus, createAdminVendorSettlement, markAdminNotificationRead, markAllAdminNotificationsRead, sendAdminPushTest, sendAdminManualNotification, moderateProduct, deleteAdminProductImage, deleteAdminProductPermanently, deleteAdminProductDeletionRequest, listAdminProductDeletionRequests, reviewAdminProductDeletion, reviewSellerApplication, setAdminVendorLock, setAdminVendorProductPublishingPermission, setAdminSupportTicketStatus, saveAdminHero, saveAdminPromotion, saveCategory, saveProduct, saveProductVariant, saveAdminProductInventory, setAdminAccountSuspension, updateAdminStoreSettings, updateAdminFoodDeliverySettings, updateAdminCommissionSettings, updateAdminSupportTicket, saveDeliveryCollection, addOrderNote, rejectAdminOrder, findCustomerDeliveryOrders, confirmOrdersWithDeliveryBatch, createFollowupDeliveryBatch, listOrderDeliveryBatches, setAdminRefundMethod, updateProductStatus, updateProductsHotDeal, setAdminProductFeatured, uploadAdditionalProductImage, uploadPublicMedia, type AdminCaseDetail, type AdminCategory, type AdminCustomerReview, type AdminAccountSuspension, type AdminCustomer, type AdminHero, type AdminInventory, type AdminNotification, type AdminOrder, type AdminOrderVendor, type AdminProduct, type AdminProductDeletionRequest, type AdminPromotion, type AdminSeller, type AdminStoreSettings, type AdminFoodDeliverySettings, type AdminCommissionSettings, type AdminSummary, type AdminSupportInboxTicket, type AdminSupportChatMessage, type AdminVariant, type AdminRefundRecord, type AdminSettlementBalance, type AdminSettlementCandidate, type AdminSettlementBatch, type AdminSettlementLedgerItem } from '../services/admin/adminService'
+import { adjustInventory, decideMarketplaceCase, deleteAdminHero, deleteAdminPromotion, deleteProductVariant, getAdminOrderDetail, getAdminProductEditor, getAdminStoreSettings, getAdminFoodDeliverySettings, getAdminCommissionSettings, getAdminSummary, getVendorDocumentSignedUrl, listAdminCategories, listAdminAuditLogsPage, listAdminPromotionsPage, listAdminHeroesPage, listSellerApplicationsPage, listAdminCategoriesPage, listAdminAccountSuspensions, listAdminCustomers, listAdminInventory, listAdminNotifications, listAdminOrders, listAdminOrderVendors, listAdminVendorPickups, markAdminVendorPickedUp, listAdminProducts, listAdminProductsPage, listAdminVendorDirectoryPage, listAdminCustomerReviews, setAdminCustomerReviewStatus, listAdminSupportTickets, listAdminSellerSupportMessages, sendAdminSellerSupportMessage, listAdminCustomerSupportMessages, sendAdminCustomerSupportMessage, listMarketplaceCases, listAdminRefundRecordsPage, listAdminVendorSettlementBalances, listAdminVendorSettlementCandidates, listAdminVendorSettlementBatchesPage, listAdminVendorSettlementItemsPage, recordAdminCaseRefund, updateAdminRefundStatus, createAdminVendorSettlement, markAdminNotificationRead, markAllAdminNotificationsRead, sendAdminPushTest, sendAdminManualNotification, moderateProduct, deleteAdminProductImage, deleteAdminProductPermanently, deleteAdminProductDeletionRequest, listAdminProductDeletionRequests, reviewAdminProductDeletion, reviewSellerApplication, setAdminVendorLock, setAdminVendorCommissionEnabled, setAdminVendorProductPublishingPermission, setAdminSupportTicketStatus, saveAdminHero, saveAdminPromotion, saveCategory, saveProduct, saveProductVariant, saveAdminProductInventory, setAdminAccountSuspension, updateAdminStoreSettings, updateAdminFoodDeliverySettings, updateAdminCommissionSettings, updateAdminSupportTicket, saveDeliveryCollection, addOrderNote, rejectAdminOrder, findCustomerDeliveryOrders, confirmOrdersWithDeliveryBatch, createFollowupDeliveryBatch, listOrderDeliveryBatches, setAdminRefundMethod, updateProductStatus, updateProductsHotDeal, setAdminProductFeatured, uploadAdditionalProductImage, uploadPublicMedia, type AdminCaseDetail, type AdminCategory, type AdminCustomerReview, type AdminAccountSuspension, type AdminCustomer, type AdminHero, type AdminInventory, type AdminNotification, type AdminOrder, type AdminOrderVendor, type AdminProduct, type AdminProductDeletionRequest, type AdminPromotion, type AdminSeller, type AdminStoreSettings, type AdminFoodDeliverySettings, type AdminCommissionSettings, type AdminSummary, type AdminSupportInboxTicket, type AdminSupportChatMessage, type AdminVariant, type AdminRefundRecord, type AdminSettlementBalance, type AdminSettlementCandidate, type AdminSettlementBatch, type AdminSettlementLedgerItem } from '../services/admin/adminService'
 import type { Database } from '../types/database'
 import { countAdminOrdersByWorkflow } from '../services/admin/adminService'
 import { getSupabase } from '../lib/supabase'
@@ -1972,7 +1972,9 @@ function Sellers() {
   const [savingReviewId, setSavingReviewId] = useState<string | null>(null)
   const [savingPermissionId, setSavingPermissionId] = useState<string | null>(null)
   const [savingVendorLockId, setSavingVendorLockId] = useState<string | null>(null)
+  const [savingCommissionId, setSavingCommissionId] = useState<string | null>(null)
   const vendorLockInFlightRef = useRef<Set<string>>(new Set())
+  const commissionInFlightRef = useRef<Set<string>>(new Set())
   const publishingInFlightRef = useRef<Set<string>>(new Set())
   const load = () => {
     setError(null)
@@ -2022,6 +2024,34 @@ function Sellers() {
     } finally {
       vendorLockInFlightRef.current.delete(item.id)
       setSavingVendorLockId((current) => current === item.id ? null : current)
+    }
+  }
+
+  async function toggleVendorCommission(item: AdminSeller) {
+    if (commissionInFlightRef.current.has(item.id)) return
+    commissionInFlightRef.current.add(item.id)
+    const nextEnabled = item.commission_enabled === false
+    const action = nextEnabled ? 'enable' : 'disable'
+    if (!window.confirm(nextEnabled
+      ? `Enable commission for ${item.shop_name}? The current category/global commission rate will apply to all of this vendor's products and future listings.`
+      : `Disable commission for ${item.shop_name}? Commission will be removed from all existing product prices and will remain off for future products. Previously placed orders will keep their saved commission.`)) {
+      commissionInFlightRef.current.delete(item.id)
+      return
+    }
+    setSavingCommissionId(item.id)
+    try {
+      const result = await setAdminVendorCommissionEnabled(item.id, nextEnabled)
+      setItems((current) => current.map((row) => row.id === item.id ? { ...row, commission_enabled: nextEnabled } : row))
+      setDetailsTarget((current) => current?.id === item.id ? { ...current, commission_enabled: nextEnabled } : current)
+      push(nextEnabled
+        ? `Commission enabled for ${item.shop_name}. Existing and future products now use the applicable commission rate.`
+        : `Commission disabled for ${item.shop_name}. ${result.products_updated} existing products updated; future products will also have 0% commission.`, 'success')
+      load()
+    } catch (cause) {
+      push(cause instanceof Error ? cause.message : `Could not ${action} vendor commission.`, 'error')
+    } finally {
+      commissionInFlightRef.current.delete(item.id)
+      setSavingCommissionId((current) => current === item.id ? null : current)
     }
   }
 
@@ -2080,7 +2110,7 @@ function Sellers() {
     </div>
     {error ? <ErrorState message={error} retry={load} /> : items.length === 0 ? <Empty title="No seller applications" detail="Change the filter to Pending to focus on applications awaiting review." /> :
       <div className="admin-table-wrap"><table className="admin-table">
-        <thead><tr><th>Shop</th><th>Business type</th><th>Contact</th><th>Status</th><th>Trusted publishing</th><th>Submitted</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Shop</th><th>Business type</th><th>Contact</th><th>Status</th><th>Trusted publishing</th><th>Commission</th><th>Submitted</th><th>Actions</th></tr></thead>
         <tbody>{items.map((item) => <Fragment key={item.id}>
           <tr>
             <td className="admin-seller-shop-cell"><strong>{item.shop_name}</strong><small>{item.slug}</small></td>
@@ -2088,6 +2118,7 @@ function Sellers() {
             <td>{item.contact_email ?? '-'}{item.phone && <small>{item.phone}</small>}<SellerDocumentLink path={item.document_path} sellerProfileId={item.id} documentType="business_document" /></td>
             <td><em className={statusClass(item.status)}>{item.status}</em>{item.vendor_locked && <small className="admin-status admin-status--suspended">Locked</small>}{item.rejection_reason && <small>Review note: {item.rejection_reason}</small>}</td>
             <td>{item.allow_product_publishing_without_review ? <em className="admin-status admin-status--approved">Enabled</em> : <em className="admin-status">Approval required</em>}</td>
+            <td><button type="button" className={item.commission_enabled === false ? 'admin-small-button' : 'admin-small-button admin-small-button--danger'} disabled={savingCommissionId === item.id} aria-pressed={item.commission_enabled !== false} aria-label={`Commission ${item.commission_enabled === false ? 'off' : 'on'} for ${item.shop_name}`} title={item.commission_enabled === false ? 'Enable commission for this vendor' : 'Disable commission for this vendor'} onClick={() => void toggleVendorCommission(item)}>{savingCommissionId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Saving...</> : item.commission_enabled === false ? 'Commission OFF' : 'Commission ON'}</button></td>
             <td>{formatDate(item.created_at)}</td>
             <td><div className="admin-action-row">
               <button type="button" className="admin-icon-button admin-seller-details-trigger" aria-label={`View details for ${item.shop_name}`} title="View shop details" onClick={() => setDetailsTarget(item)}><Eye size={17} /></button>
@@ -2106,7 +2137,7 @@ function Sellers() {
         <div className="admin-seller-details">
           <section className="admin-seller-details__wide"><h4>Shop description</h4><p>{detailsTarget.description || 'No description provided.'}</p></section>
           <section><h4>Contact information</h4><p><strong>Email:</strong> {detailsTarget.contact_email || 'Not provided'}</p><p><strong>Phone:</strong> {detailsTarget.phone || 'Not provided'}</p></section>
-          <section><h4>Identity and business details</h4><p><strong>Business category:</strong> {(detailsTarget.business_type ?? 'individual_seller').replace(/_/g, ' ')}</p><p><strong>Legal business structure:</strong> {detailsTarget.vendor_type?.replace(/_/g, ' ') || 'Not provided'}</p><p><strong>Trusted product publishing:</strong> {detailsTarget.allow_product_publishing_without_review ? 'Enabled' : 'Admin approval required'}</p><p><strong>Owner full legal name:</strong> {detailsTarget.owner_full_name || 'Not provided'}</p><p><strong>CNIC number:</strong> {detailsTarget.cnic_number ? `•••••••••${detailsTarget.cnic_number.slice(-4)}` : 'Not provided'}</p><p><strong>Shop location details:</strong> {detailsTarget.shop_location_text || 'Not provided'}</p></section>
+          <section><h4>Identity and business details</h4><p><strong>Business category:</strong> {(detailsTarget.business_type ?? 'individual_seller').replace(/_/g, ' ')}</p><p><strong>Legal business structure:</strong> {detailsTarget.vendor_type?.replace(/_/g, ' ') || 'Not provided'}</p><p><strong>Trusted product publishing:</strong> {detailsTarget.allow_product_publishing_without_review ? 'Enabled' : 'Admin approval required'}</p><p><strong>Vendor commission:</strong> {detailsTarget.commission_enabled === false ? 'OFF — 0% on existing and future products' : 'ON — applicable global/category rate'}</p><p><strong>Owner full legal name:</strong> {detailsTarget.owner_full_name || 'Not provided'}</p><p><strong>CNIC number:</strong> {detailsTarget.cnic_number ? `•••••••••${detailsTarget.cnic_number.slice(-4)}` : 'Not provided'}</p><p><strong>Shop location details:</strong> {detailsTarget.shop_location_text || 'Not provided'}</p></section>
           <section><h4>Application status</h4><p><strong>Status:</strong> {detailsTarget.status}</p><p><strong>Submitted:</strong> {formatDate(detailsTarget.created_at)}</p>{detailsTarget.vendor_locked && <p>Vendor account is locked.</p>}{detailsTarget.rejection_reason && <p><strong>Review note:</strong> {detailsTarget.rejection_reason}</p>}</section>
           <section><h4>Current address</h4><p>{detailsTarget.current_address || 'Not provided'}</p></section>
           <section><h4>Complete address</h4><p>{detailsTarget.complete_address || 'Not provided'}</p></section>
