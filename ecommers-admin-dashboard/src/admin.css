@@ -1042,3 +1042,9 @@
 .admin-app--collapsed .admin-brand{flex:0 0 auto}
 .admin-app--collapsed .admin-nav{min-height:0;flex:0 0 auto}
 .admin-app--collapsed .admin-sidebar-footer{flex:0 0 auto}
+
+
+/* Small inline progress indicator for seller governance actions. */
+.admin-inline-spinner{display:inline-block;vertical-align:-2px;animation:jtbazar-admin-spin .8s linear infinite;flex:0 0 auto}
+@keyframes jtbazar-admin-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.admin-inline-spinner{animation-duration:1.8s}}
