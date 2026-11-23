@@ -1969,6 +1969,7 @@ function Sellers() {
   const [reasonTarget, setReasonTarget] = useState<{ item: AdminSeller; status: 'rejected' | 'suspended' } | null>(null)
   const [reason, setReason] = useState('')
   const [savingReview, setSavingReview] = useState(false)
+  const [savingReviewId, setSavingReviewId] = useState<string | null>(null)
   const [savingPermissionId, setSavingPermissionId] = useState<string | null>(null)
   const [savingVendorLockId, setSavingVendorLockId] = useState<string | null>(null)
   const vendorLockInFlightRef = useRef<Set<string>>(new Set())
@@ -1983,6 +1984,7 @@ function Sellers() {
   async function review(item: AdminSeller, next: AdminSeller['status'], reviewReason?: string) {
     try {
       setSavingReview(true)
+      setSavingReviewId(item.id)
       const result = await reviewSellerApplication(item.id, next, reviewReason) as { email_sent?: boolean; email_error?: string }
       const needsEmail = next === 'approved' || next === 'rejected'
       const emailed = result.email_sent
@@ -1997,6 +1999,7 @@ function Sellers() {
       push(cause instanceof Error ? cause.message : 'Seller review failed.', 'error')
     } finally {
       setSavingReview(false)
+      setSavingReviewId((current) => current === item.id ? null : current)
     }
   }
 
@@ -2091,7 +2094,7 @@ function Sellers() {
               {(item.status === 'pending' || item.status === 'rejected') && <button type="button" className="admin-small-button" onClick={() => void review(item, 'approved')}>Approve</button>}
               {(item.status === 'pending' || item.status === 'rejected') && <button type="button" className="admin-small-button admin-small-button--danger" onClick={() => openReasonModal(item, 'rejected')}>{item.status === 'rejected' ? 'Update rejection' : 'Reject'}</button>}
               {item.status === 'approved' && <button type="button" className="admin-small-button admin-small-button--danger" onClick={() => openReasonModal(item, 'suspended')}>Suspend</button>}
-              {item.status === 'suspended' && <button type="button" className="admin-small-button" disabled={savingReview} onClick={() => void review(item, 'approved')}>{savingReview ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Processing...</> : 'Reactivate'}</button>}<button type="button" className={item.vendor_locked ? 'admin-small-button' : 'admin-small-button admin-small-button--danger'} disabled={savingVendorLockId === item.id} onClick={() => void toggleVendorLock(item)}>{savingVendorLockId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Processing...</> : item.vendor_locked ? 'Unlock vendor' : 'Lock vendor'}</button><button type="button" className={item.allow_product_publishing_without_review ? 'admin-small-button admin-small-button--danger' : 'admin-small-button'} disabled={savingPermissionId === item.id || item.status !== 'approved'} title={item.status !== 'approved' ? 'Approve vendor first' : item.allow_product_publishing_without_review ? 'Revoke trusted publishing' : 'Allow publishing without review'} onClick={() => void toggleProductPublishingPermission(item)}>{savingPermissionId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Saving...</> : item.allow_product_publishing_without_review ? 'Revoke publish permission' : 'Allow direct publishing'}</button>
+              {item.status === 'suspended' && <button type="button" className="admin-small-button" disabled={savingReviewId === item.id} onClick={() => void review(item, 'approved')}>{savingReviewId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Processing...</> : 'Reactivate'}</button>}<button type="button" className={item.vendor_locked ? 'admin-small-button' : 'admin-small-button admin-small-button--danger'} disabled={savingVendorLockId === item.id} onClick={() => void toggleVendorLock(item)}>{savingVendorLockId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Processing...</> : item.vendor_locked ? 'Unlock vendor' : 'Lock vendor'}</button><button type="button" className={item.allow_product_publishing_without_review ? 'admin-small-button admin-small-button--danger' : 'admin-small-button'} disabled={savingPermissionId === item.id || item.status !== 'approved'} title={item.status !== 'approved' ? 'Approve vendor first' : item.allow_product_publishing_without_review ? 'Revoke trusted publishing' : 'Allow publishing without review'} onClick={() => void toggleProductPublishingPermission(item)}>{savingPermissionId === item.id ? <><LoaderCircle size={14} className="admin-inline-spinner" /> Saving...</> : item.allow_product_publishing_without_review ? 'Revoke publish permission' : 'Allow direct publishing'}</button>
             </div></td>
           </tr>
 
