@@ -2494,6 +2494,20 @@ function FoodLocationMap({ initialPoint, onSelect }: { initialPoint: FoodMapPoin
     return () => { cancelled = true; mapRef.current?.remove(); mapRef.current = null }
   }, [])
 
+  useEffect(() => {
+    if (!initialPoint || !mapRef.current || !(window as any).L) return
+    const L = (window as any).L
+    const point = [initialPoint.lat, initialPoint.lng]
+    if (!markerRef.current) markerRef.current = L.marker(point, { draggable: true }).addTo(mapRef.current)
+    markerRef.current.setLatLng(point)
+    markerRef.current.off('dragend')
+    markerRef.current.on('dragend', (event: any) => {
+      const next = event.target.getLatLng()
+      onSelectRef.current({ lat: Number(next.lat.toFixed(7)), lng: Number(next.lng.toFixed(7)) })
+    })
+    mapRef.current.setView(point, 15)
+  }, [initialPoint?.lat, initialPoint?.lng])
+
   function useCurrentLocation() {
     if (!navigator.geolocation) { setMapError('This browser does not support location access.'); return }
     setLocating(true)
