@@ -2840,6 +2840,7 @@ function Promotions() {
                 <option value="product_strip">Product Strip</option>
                 <option value="after_new_arrivals">Below New Arrivals</option>
                 <option value="offer_section">Offer Section</option>
+                <option value="app_download_banner">Mobile App Promotion Banner (replaces built-in app section)</option>
               </select>
             </label>
             <label>
