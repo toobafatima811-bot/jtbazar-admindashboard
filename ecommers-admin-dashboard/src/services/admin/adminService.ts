@@ -818,13 +818,13 @@ export async function updateAdminStoreSettings(input: {
 export type AdminDeliveryPricingSettings = { origin_lat: number | null; origin_lng: number | null; origin_address: string | null; slabs: Array<{ max_km: number; fee: number }>; updated_at: string }
 
 export async function getAdminDeliveryPricingSettings(): Promise<AdminDeliveryPricingSettings> {
-  const { data, error } = await getSupabase().rpc('admin_get_delivery_pricing_settings')
+  const { data, error } = await (getSupabase() as any).rpc('admin_get_delivery_pricing_settings')
   assertError(error)
   return data as unknown as AdminDeliveryPricingSettings
 }
 
 export async function updateAdminDeliveryPricingSettings(input: { origin_lat: number | null; origin_lng: number | null; origin_address: string | null; slabs: Array<{ max_km: number; fee: number }> }): Promise<AdminDeliveryPricingSettings> {
-  const { data, error } = await getSupabase().rpc('admin_update_delivery_pricing_settings', { p_origin_lat: input.origin_lat, p_origin_lng: input.origin_lng, p_origin_address: input.origin_address, p_slabs: input.slabs })
+  const { data, error } = await (getSupabase() as any).rpc('admin_update_delivery_pricing_settings', { p_origin_lat: input.origin_lat, p_origin_lng: input.origin_lng, p_origin_address: input.origin_address, p_slabs: input.slabs })
   assertError(error)
   return data as unknown as AdminDeliveryPricingSettings
 }
