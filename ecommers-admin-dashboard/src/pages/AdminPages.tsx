@@ -305,9 +305,6 @@ function Overview() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
   const [year, setYear] = useState(String(new Date().getFullYear()))
   const [finance, setFinance] = useState<{ total: number; collected: number; outstanding: number; orderCount: number; cancelled: number; rows: { date: string; number: string; customer: string; source: string; status: string; paymentStatus: string; total: number; paid: number; outstanding: number }[] } | null>(null)
-  const [deliveryPricing, setDeliveryPricing] = useState<AdminDeliveryPricingSettings | null>(null)
-  const [deliveryOriginPoint, setDeliveryOriginPoint] = useState<FoodMapPoint | null>(null)
-  const [deliveryPricingSaving, setDeliveryPricingSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
   const loadRequestRef = useRef(0)
@@ -327,7 +324,6 @@ function Overview() {
   const loadRef = useRef(load)
   loadRef.current = load
   useEffect(load, [])
-  useEffect(() => { void getAdminDeliveryPricingSettings().then((value) => { setDeliveryPricing(value); setDeliveryOriginPoint(value.origin_lat != null && value.origin_lng != null ? { lat: value.origin_lat, lng: value.origin_lng } : null) }).catch((cause) => push(cause instanceof Error ? cause.message : 'Delivery pricing could not be loaded.', 'error')) }, [])
   useAutoRefresh(load)
   useEffect(() => {
     let active = true
@@ -2552,6 +2548,9 @@ const DEFAULT_MARKETPLACE_HOURS: Record<string, { enabled: boolean; open: string
 
 function StoreSettings() {
   const { push } = useToast()
+  const [deliveryPricing, setDeliveryPricing] = useState<AdminDeliveryPricingSettings | null>(null)
+  const [deliveryOriginPoint, setDeliveryOriginPoint] = useState<FoodMapPoint | null>(null)
+  const [deliveryPricingSaving, setDeliveryPricingSaving] = useState(false)
   const [settings, setSettings] = useState<AdminStoreSettings | null>(null)
   const [foodLocation, setFoodLocation] = useState<AdminFoodDeliverySettings | null>(null)
   const [commissionSettings, setCommissionSettings] = useState<AdminCommissionSettings | null>(null)
@@ -2563,6 +2562,7 @@ function StoreSettings() {
   const [saving, setSaving] = useState(false)
   const load = () => { setError(null); void getAdminStoreSettings().then(setSettings).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Store settings could not be loaded.')) }
   useEffect(load, [])
+  useEffect(() => { void getAdminDeliveryPricingSettings().then((value) => { setDeliveryPricing(value); setDeliveryOriginPoint(value.origin_lat != null && value.origin_lng != null ? { lat: value.origin_lat, lng: value.origin_lng } : null) }).catch((cause) => push(cause instanceof Error ? cause.message : 'Delivery pricing could not be loaded.', 'error')) }, [])
   useEffect(() => {
     void Promise.all([getAdminCommissionSettings(), listAdminCategories()])
       .then(([commission, categories]) => { setCommissionSettings(commission); setCommissionCategories(categories) })
