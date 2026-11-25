@@ -18,7 +18,6 @@ export function ProductVideos() {
   const [productSearch, setProductSearch] = useState('')
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [productCount, setProductCount] = useState(0)
-  const [productPage, setProductPage] = useState(0)
   const [productsLoading, setProductsLoading] = useState(false)
   const [productId, setProductId] = useState('')
   const [file, setFile] = useState<File | null>(null)
@@ -38,14 +37,25 @@ export function ProductVideos() {
   useEffect(() => {
     let active = true
     setProductsLoading(true)
+    setProducts([])
     const timer = window.setTimeout(() => {
-      void listAdminProductsPage(productSearch, productPage, 12, null, 'approved', false)
-        .then(result => { if (active) { setProducts(current => productPage === 0 ? result.items : [...current, ...result.items]); setProductCount(result.count) } })
+      void Promise.all([
+        listAdminProductsPage(productSearch, 0, 50, null, 'approved', false),
+        listAdminProductsPage(productSearch, 0, 50, null, 'approved', true),
+      ])
+        .then(([vendorResult, platformResult]) => {
+          if (!active) return
+          const allProducts = [...vendorResult.items, ...platformResult.items]
+            .filter((product, index, list) => list.findIndex(item => item.id === product.id) === index)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          setProducts(allProducts)
+          setProductCount(vendorResult.count + platformResult.count)
+        })
         .catch(cause => { if (active) push(cause instanceof Error ? cause.message : 'Products could not be searched.', 'error') })
         .finally(() => { if (active) setProductsLoading(false) })
     }, 250)
     return () => { active = false; window.clearTimeout(timer) }
-  }, [productSearch, productPage])
+  }, [productSearch])
 
   const selectedProduct = useMemo(() => products.find(product => product.id === productId), [products, productId])
   function chooseFile(next: File | null) {
@@ -84,10 +94,9 @@ export function ProductVideos() {
       <div className="admin-panel-heading"><div><p className="admin-kicker">New video</p><h3>Upload and link a product</h3></div><Film size={21}/></div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
         <div style={{ display: 'grid', gap: 8 }}>
-          <label style={labelStyle}>Search product<input style={inputStyle} type="search" value={productSearch} onChange={event => { setProductSearch(event.target.value); setProductPage(0); setProducts([]) }} placeholder="Search product name or SKU"/></label>
+          <label style={labelStyle}>Search product<input style={inputStyle} type="search" value={productSearch} onChange={event => setProductSearch(event.target.value)} placeholder="Search product name or SKU"/></label>
           <label style={labelStyle}>Select product<select style={inputStyle} value={productId} onChange={event => setProductId(event.target.value)}><option value="">{productsLoading ? 'Searching products…' : 'Choose product'}</option>{products.map(product => <option key={product.id} value={product.id}>{product.name}{product.sku ? ' · '+product.sku : ''}</option>)}</select></label>
           <small className="admin-copy">Showing {products.length} of {productCount} approved catalog products.</small>
-          {products.length < productCount && <button type="button" className="admin-button admin-button--outline" disabled={productsLoading} onClick={() => setProductPage(value => value + 1)}>{productsLoading ? 'Loading products…' : 'Load more products'}</button>}
           {selectedProduct && <small className="admin-copy">Linked product: {selectedProduct.name}</small>}
         </div>
         <div style={{ display: 'grid', gap: 8 }}>
