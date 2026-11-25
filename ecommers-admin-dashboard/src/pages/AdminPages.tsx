@@ -306,6 +306,11 @@ function Overview() {
   const [year, setYear] = useState(String(new Date().getFullYear()))
   const [finance, setFinance] = useState<{ total: number; collected: number; outstanding: number; orderCount: number; cancelled: number; rows: { date: string; number: string; customer: string; source: string; status: string; paymentStatus: string; total: number; paid: number; outstanding: number }[] } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [products, setProducts] = useState<AdminProduct[]>([])
+  const [selectedProductId, setSelectedProductId] = useState('')
+  const [recipientMode, setRecipientMode] = useState<'all' | 'selected'>('all')
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([])
+  const [bulkSending, setBulkSending] = useState(false)
   const [reportLoading, setReportLoading] = useState(false)
   const loadRequestRef = useRef(0)
   const load = () => {
@@ -3678,7 +3683,15 @@ function PushNotifications() {
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Customer list could not be loaded.') }
     finally { setLoadingCustomers(false) }
   }
-  useEffect(() => { void loadCustomers() }, [])
+  async function loadProducts() {
+    try {
+      const rows = await listAdminProducts()
+      setProducts(rows.filter((item) => item.publication_status === 'published' && item.moderation_status === 'approved'))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Products could not be loaded.')
+    }
+  }
+  useEffect(() => { void loadCustomers(); void loadProducts() }, [])
 
   async function sendTest() {
     setTesting(true); setTestResult(null)
@@ -3704,6 +3717,28 @@ function PushNotifications() {
     catch (cause) { push(cause instanceof Error ? cause.message : 'Notification could not be sent.', 'error') }
     finally { setSending(false) }
   }
+  async function sendProductBroadcast(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const product = products.find((item) => item.id === selectedProductId)
+    if (!product) { push('Choose a published product first.', 'error'); return }
+    if (!product.image_url) { push('This product has no public image. Add a product image first.', 'error'); return }
+    const recipients = recipientMode === 'all' ? customers.map((item) => item.id) : selectedRecipientIds
+    if (!recipients.length) { push('Select at least one customer.', 'error'); return }
+    const titleText = product.name.slice(0, 120)
+    const messageText = body.trim() || `Discover ${product.name} at JTBazar. Tap to view the product.`
+    if (!window.confirm(`Send "${product.name}" with its image to ${recipients.length} customer(s)?`)) return
+    setBulkSending(true)
+    try {
+      const link = `https://www.jt-bazar.com/products/${encodeURIComponent(product.slug)}`
+      const queued = await sendAdminProductBroadcast(recipients, titleText, messageText, product.image_url, link, product.id)
+      push(`Product notification queued for ${queued} customer(s).`, 'success')
+    } catch (cause) {
+      push(cause instanceof Error ? cause.message : 'Product notification could not be sent.', 'error')
+    } finally {
+      setBulkSending(false)
+    }
+  }
+  const selectedProduct = products.find((item) => item.id === selectedProductId)
   const selectedCustomer = customers.find(customer => customer.id === selectedUser)
   return <section className="admin-content push-center">
     <div className="push-hero">
@@ -3744,6 +3779,35 @@ function PushNotifications() {
           <textarea id="push-body" className="push-textarea" value={body} onChange={event => setBody(event.target.value)} rows={5} maxLength={500} placeholder="Write your message here…" required/>
           <div className="push-counter">{body.length}/500</div>
           <div className="push-compose__foot"><small><ShieldAlert size={14}/> Also saved in the customer's notification inbox</small><button className="push-primary" disabled={sending || !selectedUser || !title.trim() || !body.trim()}>{sending ? 'Sending…' : <><Send size={16}/> Send notification</>}</button></div>
+        </form>
+      </section>
+      <section className="push-card" style={{gridColumn:'1 / -1'}}>
+        <div className="push-card__heading"><div><span className="push-step">04 · PRODUCT BROADCAST</span><h3>Send new product notification</h3><p>Select a published product and notify multiple customers with its image and direct product link.</p></div><span className="push-card-symbol"><Package size={20}/></span></div>
+        <form onSubmit={event => void sendProductBroadcast(event)} style={{display:'grid',gap:14}}>
+          <label className="push-label" htmlFor="push-product">Published product</label>
+          <select id="push-product" className="push-select" value={selectedProductId} onChange={event => setSelectedProductId(event.target.value)} required>
+            <option value="">Choose a product…</option>
+            {products.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select>
+          {selectedProduct && <div className="push-selected" style={{alignItems:'center',gap:14}}>
+            {selectedProduct.image_url ? <img src={selectedProduct.image_url} alt={selectedProduct.name} style={{width:76,height:76,objectFit:'cover',borderRadius:10}}/> : <ImageIcon size={28}/>}
+            <div><strong>{selectedProduct.name}</strong><small>Image will be attached to supported push notifications.</small><small>https://www.jt-bazar.com/products/{selectedProduct.slug}</small></div>
+          </div>}
+          <label className="push-label" htmlFor="push-audience">Recipients</label>
+          <select id="push-audience" className="push-select" value={recipientMode} onChange={event => setRecipientMode(event.target.value as 'all'|'selected')}>
+            <option value="all">All customers ({customers.length})</option>
+            <option value="selected">Choose multiple customers</option>
+          </select>
+          {recipientMode === 'selected' && <div style={{maxHeight:220,overflowY:'auto',border:'1px solid var(--admin-border, #dfe3ea)',borderRadius:10,padding:12,display:'grid',gap:8}}>
+            {customers.map(customer => <label key={customer.id} style={{display:'flex',alignItems:'center',gap:9,fontSize:13}}>
+              <input type="checkbox" checked={selectedRecipientIds.includes(customer.id)} onChange={event => setSelectedRecipientIds(current => event.target.checked ? [...current,customer.id] : current.filter(id => id !== customer.id))}/>
+              <span>{customer.full_name || 'Unnamed customer'} · {customer.email || customer.phone || customer.id.slice(0,8)}</span>
+            </label>)}
+          </div>}
+          <label className="push-label" htmlFor="push-product-message">Message</label>
+          <textarea id="push-product-message" className="push-textarea" value={body} onChange={event => setBody(event.target.value)} rows={3} maxLength={500} placeholder="Discover this product at JTBazar…"/>
+          <div className="push-counter">{body.length}/500 · Product name is used as the notification title</div>
+          <div className="push-compose__foot"><small><ShieldAlert size={14}/> Notifications are also saved in each customer's inbox.</small><button className="push-primary" disabled={bulkSending || !selectedProductId || !customers.length || (recipientMode === 'selected' && !selectedRecipientIds.length)}>{bulkSending ? <><RefreshCw size={16} className="push-spin"/> Sending…</> : <><Send size={16}/> Send to {recipientMode === 'all' ? 'all customers' : `${selectedRecipientIds.length} selected`}</>}</button></div>
         </form>
       </section>
     </div>
