@@ -100,6 +100,7 @@ export interface Database {
       admin_list_products: { Args: { p_search?: string }; Returns: ProductRow[] }
       admin_get_product_by_id: { Args: { p_product_id: string }; Returns: ProductRow[] }
       admin_customer_summary: { Args: Record<string, never>; Returns: { id: string; full_name: string | null; phone: string | null; avatar_url: string | null; email: string | null; order_count: number; lifetime_value: number; created_at: string; updated_at: string }[] }
+      admin_push_customer_summary: { Args: Record<string, never>; Returns: { id: string; full_name: string | null; phone: string | null; avatar_url: string | null; email: string | null; order_count: number; lifetime_value: number; created_at: string; updated_at: string }[] }
       admin_account_suspensions: { Args: Record<string, never>; Returns: { user_id: string; reason: string; suspended_at: string; suspended_by: string }[] }
       admin_update_store_settings: { Args: { p_settings: Json }; Returns: StoreSettingsRow }
       admin_get_jtbazar_food_delivery_settings: { Args: Record<string, never>; Returns: Json }
