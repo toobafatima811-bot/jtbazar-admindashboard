@@ -306,11 +306,6 @@ function Overview() {
   const [year, setYear] = useState(String(new Date().getFullYear()))
   const [finance, setFinance] = useState<{ total: number; collected: number; outstanding: number; orderCount: number; cancelled: number; rows: { date: string; number: string; customer: string; source: string; status: string; paymentStatus: string; total: number; paid: number; outstanding: number }[] } | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [products, setProducts] = useState<AdminProduct[]>([])
-  const [selectedProductId, setSelectedProductId] = useState('')
-  const [recipientMode, setRecipientMode] = useState<'all' | 'selected'>('all')
-  const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([])
-  const [bulkSending, setBulkSending] = useState(false)
   const [reportLoading, setReportLoading] = useState(false)
   const loadRequestRef = useRef(0)
   const load = () => {
@@ -3676,6 +3671,12 @@ function PushNotifications() {
   const [sending, setSending] = useState(false)
   const [testResult, setTestResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [products, setProducts] = useState<AdminProduct[]>([])
+  const [selectedProductId, setSelectedProductId] = useState('')
+  const [recipientMode, setRecipientMode] = useState<'all' | 'selected'>('all')
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([])
+  const [bulkSending, setBulkSending] = useState(false)
+  const [productMessage, setProductMessage] = useState('')
 
   async function loadCustomers() {
     setLoadingCustomers(true); setError(null)
@@ -3725,7 +3726,7 @@ function PushNotifications() {
     const recipients = recipientMode === 'all' ? customers.map((item) => item.id) : selectedRecipientIds
     if (!recipients.length) { push('Select at least one customer.', 'error'); return }
     const titleText = product.name.slice(0, 120)
-    const messageText = body.trim() || `Discover ${product.name} at JTBazar. Tap to view the product.`
+    const messageText = productMessage.trim() || `Discover ${product.name} at JTBazar. Tap to view the product.`
     if (!window.confirm(`Send "${product.name}" with its image to ${recipients.length} customer(s)?`)) return
     setBulkSending(true)
     try {
@@ -3805,7 +3806,7 @@ function PushNotifications() {
             </label>)}
           </div>}
           <label className="push-label" htmlFor="push-product-message">Message</label>
-          <textarea id="push-product-message" className="push-textarea" value={body} onChange={event => setBody(event.target.value)} rows={3} maxLength={500} placeholder="Discover this product at JTBazar…"/>
+          <textarea id="push-product-message" className="push-textarea" value={productMessage} onChange={event => setProductMessage(event.target.value)} rows={3} maxLength={500} placeholder="Discover this product at JTBazar…"/>
           <div className="push-counter">{body.length}/500 · Product name is used as the notification title</div>
           <div className="push-compose__foot"><small><ShieldAlert size={14}/> Notifications are also saved in each customer's inbox.</small><button className="push-primary" disabled={bulkSending || !selectedProductId || !customers.length || (recipientMode === 'selected' && !selectedRecipientIds.length)}>{bulkSending ? <><RefreshCw size={16} className="push-spin"/> Sending…</> : <><Send size={16}/> Send to {recipientMode === 'all' ? 'all customers' : `${selectedRecipientIds.length} selected`}</>}</button></div>
         </form>
