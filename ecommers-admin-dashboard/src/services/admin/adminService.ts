@@ -1218,6 +1218,41 @@ export async function sendAdminManualNotification(userId: string, title: string,
   assertError(error)
 }
 
+export async function sendAdminProductBroadcast(
+  userIds: string[],
+  title: string,
+  body: string,
+  imageUrl: string,
+  linkUrl: string,
+  productId: string,
+): Promise<number> {
+  const recipients = [...new Set(userIds.filter(Boolean))]
+  const cleanTitle = title.trim()
+  const cleanBody = body.trim()
+  if (!recipients.length) throw new Error('Select at least one customer.')
+  if (recipients.length > 5000) throw new Error('Send to no more than 5,000 customers at a time.')
+  if (!cleanTitle || cleanTitle.length > 120) throw new Error('Title is required and must be 120 characters or fewer.')
+  if (!cleanBody || cleanBody.length > 500) throw new Error('Message is required and must be 500 characters or fewer.')
+  if (!/^https:\/\//i.test(imageUrl)) throw new Error('A public HTTPS product image is required.')
+  if (!/^https:\/\//i.test(linkUrl)) throw new Error('A valid HTTPS product link is required.')
+  if (!productId) throw new Error('Choose a product first.')
+
+  const client = getSupabase() as any
+  for (let index = 0; index < recipients.length; index += 100) {
+    const rows = recipients.slice(index, index + 100).map((user_id) => ({
+      user_id,
+      kind: 'store',
+      title: cleanTitle,
+      body: cleanBody,
+      image_url: imageUrl,
+      link_url: linkUrl,
+    }))
+    const { error } = await client.from('notifications').insert(rows)
+    assertError(error)
+  }
+  return recipients.length
+}
+
 
 export type AdminProductVideo = {
   id: string
