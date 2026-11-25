@@ -771,6 +771,18 @@ export async function listAdminCustomers(): Promise<AdminCustomer[]> {
   return (data ?? []) as AdminCustomer[]
 }
 
+export async function listAdminPushRecipients(): Promise<AdminCustomer[]> {
+  const client = getSupabase() as any
+  const [{ data: roleRows, error: roleError }, { data: customerRows, error: customerError }] = await Promise.all([
+    client.from('user_roles').select('user_id').eq('role', 'customer').limit(5000),
+    client.rpc('admin_customer_summary'),
+  ])
+  assertError(roleError)
+  assertError(customerError)
+  const customerIds = new Set((roleRows ?? []).map((row: { user_id: string }) => row.user_id))
+  return ((customerRows ?? []) as AdminCustomer[]).filter((customer) => customerIds.has(customer.id))
+}
+
 export async function listAdminAccountSuspensions(): Promise<AdminAccountSuspension[]> {
   const { data, error } = await getSupabase().rpc('admin_account_suspensions')
   assertError(error)
