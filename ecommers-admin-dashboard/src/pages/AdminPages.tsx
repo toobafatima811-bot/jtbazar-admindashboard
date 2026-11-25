@@ -3730,7 +3730,7 @@ function PushNotifications() {
     if (!window.confirm(`Send "${product.name}" with its image to ${recipients.length} customer(s)?`)) return
     setBulkSending(true)
     try {
-      const link = `https://www.jt-bazar.com/products/${encodeURIComponent(product.slug)}`
+      const link = `https://www.jt-bazar.com/products/${encodeURIComponent(product.slug)}?product_id=${encodeURIComponent(product.id)}`
       const queued = await sendAdminProductBroadcast(recipients, titleText, messageText, product.image_url, link, product.id)
       push(`Product notification queued for ${queued} customer(s).`, 'success')
     } catch (cause) {
